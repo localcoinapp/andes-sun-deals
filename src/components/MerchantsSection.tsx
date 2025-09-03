@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Store, 
   Percent, 
@@ -22,30 +23,49 @@ const MerchantsSection = () => {
     phone: "",
     message: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Create mailto link
-    const subject = encodeURIComponent("Interés en DiscoverBolivia - Socio Comercial");
-    const body = encodeURIComponent(`
-Nombre: ${formData.name}
-Negocio: ${formData.business}
-Email: ${formData.email}
-Teléfono: ${formData.phone}
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Combine phone and message for the contacts table message field
+      const contactMessage = `Teléfono: ${formData.phone || 'No proporcionado'}
 
-Mensaje:
-${formData.message}
-    `);
-    
-    window.location.href = `mailto:localcoinapp@gmail.com?subject=${subject}&body=${body}`;
-    
-    toast({
-      title: "¡Solicitud Enviada!",
-      description: "Te contactaremos pronto para discutir tu participación.",
-    });
-    
-    setFormData({ name: "", business: "", email: "", phone: "", message: "" });
+${formData.message}`;
+      
+      const { error } = await supabase
+        .from('contacts')
+        .insert([{
+          name: formData.name,
+          email: formData.email,
+          business: formData.business,
+          message: contactMessage
+        }]);
+        
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "¡Solicitud Enviada!",
+        description: "Te contactaremos pronto para discutir tu participación.",
+      });
+      
+      setFormData({ name: "", business: "", email: "", phone: "", message: "" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Hubo un problema al enviar tu solicitud.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const benefits = [
@@ -207,8 +227,8 @@ ${formData.message}
                   />
                 </div>
 
-                <Button type="submit" variant="mountain" size="lg" className="w-full">
-                  Enviar Solicitud de Contacto
+                <Button type="submit" variant="mountain" size="lg" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Enviando..." : "Enviar Solicitud de Contacto"}
                 </Button>
               </form>
             </CardContent>

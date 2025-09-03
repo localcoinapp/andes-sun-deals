@@ -2,20 +2,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-bolivia.jpg";
 
 const HeroSection = () => {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([{ email }]);
+        
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "¡Gracias por unirte!",
         description: "Te notificaremos cuando DiscoverBolivia esté listo.",
       });
       setEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Hubo un problema al procesar tu solicitud.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -78,8 +100,8 @@ const HeroSection = () => {
                 className="flex-1"
                 required
               />
-              <Button type="submit" variant="sun">
-                Notificarme
+              <Button type="submit" variant="sun" disabled={isSubmitting}>
+                {isSubmitting ? "Enviando..." : "Notificarme"}
               </Button>
             </form>
           </div>

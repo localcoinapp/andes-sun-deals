@@ -2,20 +2,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Mail, MapPin, Sun } from "lucide-react";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([{ email }]);
+        
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "¡Suscripción Exitosa!",
         description: "Te mantendremos informado sobre DiscoverBolivia.",
       });
       setEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Hubo un problema al procesar tu suscripción.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -85,8 +107,8 @@ const Footer = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <Button type="submit" variant="sun" size="sm" className="w-full">
-                Suscribirse
+              <Button type="submit" variant="sun" size="sm" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Enviando..." : "Suscribirse"}
               </Button>
             </form>
           </div>
