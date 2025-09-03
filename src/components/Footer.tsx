@@ -95,7 +95,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="border-t border-border/50 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-muted-foreground text-sm">
-            © 2024 DiscoverBolivia. Todos los derechos reservados.
+            © {new Date().getFullYear()} DiscoverBolivia. Todos los derechos reservados.
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Mail className="w-4 h-4" />
