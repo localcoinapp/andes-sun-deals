@@ -18,7 +18,7 @@ const HeroSection = () => {
     
     try {
       const { error } = await supabase
-        .from('waitlist')
+        .from('bolivia_waitlist')
         .insert([{ email }]);
         
       if (error) {

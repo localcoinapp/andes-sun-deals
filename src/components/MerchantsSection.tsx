@@ -39,7 +39,7 @@ const MerchantsSection = () => {
 ${formData.message}`;
       
       const { error } = await supabase
-        .from('contacts')
+        .from('bolivia_contacts')
         .insert([{
           name: formData.name,
           email: formData.email,

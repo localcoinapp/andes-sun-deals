@@ -18,7 +18,7 @@ const Footer = () => {
     
     try {
       const { error } = await supabase
-        .from('waitlist')
+        .from('bolivia_waitlist')
         .insert([{ email }]);
         
       if (error) {
@@ -121,8 +121,8 @@ const Footer = () => {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Mail className="w-4 h-4" />
-            <a href="mailto:localcoinapp@gmail.com" className="hover:text-primary transition-colors">
-              localcoinapp@gmail.com
+            <a href="mailto:hola@discoverbolivia.live" className="hover:text-primary transition-colors">
+              hola@discoverbolivia.live
             </a>
           </div>
         </div>
